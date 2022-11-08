@@ -12,12 +12,15 @@ public class TopicoDTO {
 	private Long id;
 	private String titulo;
 	private String mensagem;
+	private String nomeCurso;
+
 	private LocalDateTime dataCriacao;
 
 	public TopicoDTO(Topico topico) {
 		this.id = topico.getId();
 		this.titulo = topico.getTitulo();
 		this.mensagem = topico.getMensagem();
+		this.nomeCurso = topico.getCurso().getNome();	
 		this.dataCriacao = topico.getDataCriacao();
 	}
 
@@ -31,6 +34,10 @@ public class TopicoDTO {
 
 	public String getMensagem() {
 		return mensagem;
+	}
+
+	public String getNomeCurso() {
+		return nomeCurso;
 	}
 
 	public LocalDateTime getDataCriacao() {
