@@ -1,13 +1,16 @@
 package br.com.alura.forum.controller;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,13 +42,14 @@ public class TopicosController {
 	private CursoRepository cursoRepository;
 
 	@GetMapping
-	public List<TopicoDTO> lista(String nomeCurso) {
-		List<Topico> topicos = null;
+	public Page<TopicoDTO> lista(@RequestParam(required = false) String nomeCurso,
+			@PageableDefault(sort = "id", direction = Direction.DESC, page = 0, size = 10) Pageable paginacao) {
+		Page<Topico> topicos = null;
 
 		if (nomeCurso == null)
-			topicos = topicoRepository.findAll();
+			topicos = topicoRepository.findAll(paginacao);
 		else
-			topicos = topicoRepository.findByCurso_Nome(nomeCurso);
+			topicos = topicoRepository.findByCurso_Nome(nomeCurso, paginacao);
 
 		return TopicoDTO.parse(topicos);
 	}
@@ -77,7 +81,7 @@ public class TopicosController {
 
 		if (!optional.isPresent())
 			return ResponseEntity.notFound().build();
-		
+
 		Topico topico = form.atualizar(id, topicoRepository);
 		return ResponseEntity.ok(new TopicoDTO(topico));
 	}
@@ -85,6 +89,11 @@ public class TopicosController {
 	@DeleteMapping("/{id}")
 	@Transactional
 	public ResponseEntity<?> remover(@PathVariable Long id) {
+		Optional<Topico> optional = topicoRepository.findById(id);
+
+		if (!optional.isPresent())
+			return ResponseEntity.notFound().build();
+
 		topicoRepository.deleteById(id);
 		return ResponseEntity.ok().build();
 	}
